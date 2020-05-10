@@ -8,6 +8,12 @@ import psutil
 import win32.win32clipboard as win32clipboard
 from io import StringIO
 from board import copy_board_to_clipboard
+import os
+import sys
+try:
+    BASE_PATH = sys._MEIPASS
+except:
+    BASE_PATH  = '.'
 
 class WhatsApp():
     def __init__(self, contact):
@@ -19,7 +25,9 @@ class WhatsApp():
         chrome_options.add_argument("--disable-extensions");
         chrome_options.add_argument("--disable-dev-shm-usage");
         chrome_options.add_argument("--no-sandbox");
-        self.wd = webdriver.WebDriver(options=chrome_options)
+        exe_path = os.path.join(BASE_PATH, 'chromedriver.exe')
+        chromedrvr_path = os.path.join(os.path.dirname(os.path.abspath("__file__")), exe_path)
+        self.wd = webdriver.WebDriver(chromedrvr_path, options=chrome_options)
         self.wd.implicitly_wait(300)
         print("Navigating to chrome")
         self.wd.get("https://web.whatsapp.com/")

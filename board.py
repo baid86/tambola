@@ -3,16 +3,18 @@ import random, time
 import clipboard
 import win32.win32clipboard as win32clipboard
 from io import StringIO, BytesIO
+from threading import Lock
+imagLock = Lock()
 
 called_no = []
 last_called = []
 
 def draw_board(called_list, last_called):
+    imagLock.acquire()
     img = Image.new('RGB', (5000, 4500), color='white')
     draw = ImageDraw.Draw(img)
-
     for no in range(1,91):
-        if no == called_no[-1]:
+        if len(called_list) and no == called_list[-1]:
             font_color = "black"
             block_color = "cyan"
         elif no in called_list:
@@ -24,8 +26,10 @@ def draw_board(called_list, last_called):
         draw_no(draw, no, font_color=font_color, bkg_color=block_color)
     img.save("board.png")
     img.close()
+    imagLock.release()
 
 def copy_board_to_clipboard():
+    imagLock.acquire()
     img = Image.open('board.png')
     output = BytesIO()
     img.convert("RGB").save(output, "BMP")
@@ -33,7 +37,7 @@ def copy_board_to_clipboard():
     output.close()
     send_to_clipboard(win32clipboard.CF_DIB, data)
     img.close()
-
+    imagLock.release()
 
 def send_to_clipboard(clip_type, data):
     win32clipboard.OpenClipboard()
@@ -52,5 +56,5 @@ def draw_no(draw, no, font_color, bkg_color):
     draw.rectangle(shape, fill =bkg_color, outline ="black")
     draw.text((x+100,y+100), str(no), font=fnt, fill=font_color)
 
-draw_board([3,10,56, 84], [10])
+
 
